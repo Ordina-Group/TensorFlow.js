@@ -7,6 +7,7 @@ let imgElem = null;
 let detectedObjects = [];
 let modelLoaded = false;
 
+//wire everything together.
 function init() {
     updateStatus('Loading...');
 
@@ -49,6 +50,7 @@ function init() {
     });
 }
 
+//Load an image from the given url
 function processSelectedImage(imageUrl) {
     updateStatus('Processing image...');
     img = loadImage(imageUrl, imageLoaded);
@@ -57,6 +59,8 @@ function processSelectedImage(imageUrl) {
     imgElem.hide();
 }
 
+//Fixes image sizes & aspect ratio after loading
+//Starts classification of the image
 function imageLoaded() {
     img.resize(800, 0);
     imgElem.size(img.width, img.height);
