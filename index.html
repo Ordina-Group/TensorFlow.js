@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YOLO with ML5.js</title>
+    <script src="https://unpkg.com/ml5@0.1.3/dist/ml5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.dom.min.js"></script>
+    <script src="index.js"></script>
+</head>
+
+<body>
+
+<h1>Select an image to classify</h1>
+
+<div id="dropContainer" style="border:1px solid black;height:100px;">
+    Drop image file here
+</div>
+Or select a file:
+<input type="file" id="fileInput" multiple="false" accept="image/*"/>
+
+<br/><br/>
+<p>
+    Status: <span id="status"></span>
+</p>
+
+<br/><br/>
+
+</body>
+</html>
