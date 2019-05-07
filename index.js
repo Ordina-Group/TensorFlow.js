@@ -1,5 +1,6 @@
 window.onload = init;
 
+let classifier = null;
 let yolo = null;
 let cnvs = null;
 let img = null;
@@ -7,7 +8,6 @@ let imgElem = null;
 let detectedObjects = [];
 let modelLoaded = false;
 
-//wire everything together.
 function init() {
     updateStatus('Loading...');
 
@@ -19,34 +19,36 @@ function init() {
     fileInput.disabled = true;
     dropContainer.disabled = true;
 
-    yolo = ml5.YOLO(() => {
-        modelLoaded = true;
-        updateStatus('Model loaded, select an image file to classify!');
+    classifier = ml5.imageClassifier('MobileNet', () => {
+        yolo = ml5.YOLO(() => {
+            modelLoaded = true;
+            updateStatus('Model loaded, select an image file to classify!');
 
-        fileInput.disabled = false;
-        dropContainer.disabled = false;
+            fileInput.disabled = false;
+            dropContainer.disabled = false;
 
 
-        fileInput.addEventListener('change', () => {
-            if(fileInput.files.length === 1) {
-                processSelectedImage(URL.createObjectURL(fileInput.files[0]));
-            } else {
-                updateStatus('Too many files selected, only select one file!');
-            }
-        });
-        dropContainer.ondragover = dropContainer.ondragenter = (evt) => {
-            evt.preventDefault();
-        };
-        dropContainer.ondrop = (evt) => {
-            if(evt.dataTransfer.files.length === 1) {
-                fileInput.files = evt.dataTransfer.files;
+            fileInput.addEventListener('change', () => {
+                if(fileInput.files.length === 1) {
+                    processSelectedImage(URL.createObjectURL(fileInput.files[0]));
+                } else {
+                    updateStatus('Too many files selected, only select one file!');
+                }
+            });
+            dropContainer.ondragover = dropContainer.ondragenter = (evt) => {
                 evt.preventDefault();
+            };
+            dropContainer.ondrop = (evt) => {
+                if(evt.dataTransfer.files.length === 1) {
+                    fileInput.files = evt.dataTransfer.files;
+                    evt.preventDefault();
 
-                processSelectedImage(URL.createObjectURL(fileInput.files[0]));
-            } else {
-                updateStatus('Too many files dropped, only drag in one file!');
-            }
-        };
+                    processSelectedImage(URL.createObjectURL(fileInput.files[0]));
+                } else {
+                    updateStatus('Too many files dropped, only drag in one file!');
+                }
+            };
+        });
     });
 }
 
@@ -67,12 +69,29 @@ function imageLoaded() {
     cnvs.resize(img.width, img.height);
 
     updateStatus('Detecting...');
+    classifier.predict(imgElem, (error, result) => {
+
+        if(error) {
+            updateStatus('Could not classify image: ' + error);
+        } else {
+            const ul = document.getElementById('classifiedResults');
+            while (ul.firstChild) {
+                ul.removeChild(ul.firstChild);
+            }
+            for (const detection of result) {
+                const li = document.createElement('li');
+                li.textContent = detection.className + ' (' + Math.round(detection.probability * 100) + ')';
+                ul.appendChild(li);
+            }
+        }
+    });
+
     yolo.detect(imgElem, (error, result) => {
         if(error) {
             updateStatus('Could not classify image: ' + error);
         } else {
             detectedObjects = result;
-            updateStatus('Detected ' + result.length + (result.length === 1 ? ' object.' : ' objects.'));
+            document.getElementById('yoloResults').textContent = 'Detected ' + result.length + (result.length === 1 ? ' object.' : ' objects.') + ' (see image)';
         }
     });
 }
